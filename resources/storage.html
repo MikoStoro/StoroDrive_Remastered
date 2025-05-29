@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="panels.css">
+</head>
+<body>
+    <div class="centered">
+        <h1>Witaj w schowku!</h1>
+        <h2>  {{id}} </h2>
+    </div>
+
+    <div class="centered">
+        {{content}}
+    </div>
+
+    <br>
+    <div class="centered">
+        <button onclick="showPanel('uploadPanel')">Załaduj Pliki</button>
+    </div>
+
+    <div id="smokescreen"></div>
+    <div id="uploadPanel" class="panel">
+        <div id="dropContainer" class="drop_site"  >
+            Drop Here
+        </div>
+        <br>
+        <div class="centered">
+            <form id="fileUploadForm" action="/upload" method="post" enctype="multipart/form-data" target="_self">
+                Wybierz plik: <input id="fileInput" type="file" name="file" />
+                <input  type="text" name="catalogue" value="{{id}}" hidden="true" />
+                
+            </form>
+            <div id="files_list">
+
+            </div>
+            <br>
+            <button onclick="resetFilesUpload()">Reset</button>
+            <button onclick="closeUploadPanel()">Zamknij</button>
+            <input type="submit" value="Prześlij" form="fileUploadForm"/>
+        </div>
+    </div>
+    <script src="dragDrop.js"></script>
+    <script src="panels.js"></script>
+    
+</body>

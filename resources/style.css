@@ -1,0 +1,14 @@
+.centered{
+    text-align: center;
+    width: 100%;
+}
+
+.document{
+    text-align: center;
+}
+
+.drop_site {
+    border:1px solid black;
+    height:100px;
+  }
+
