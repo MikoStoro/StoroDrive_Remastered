@@ -2,17 +2,35 @@
 <html lang="pl">
 <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="static/style.css">
 </head>
 <body>
     <div class="centered">
         <h1>StoroDrive</h1>
-        <h3>Storomy się jak możemy</h3>
+        <h3>Storomy się jak możemy!</h3>
+        {% if uname is defined %}
+            <h4> Witaj, {{uname}}!</h4>
+        {% endif %}
     </div>
     <div class="centered">
         <p>
-            <a href="/storage?catalogue=common">Otwórz schowek</a>
+            <a href="/storage?catalogue=common">Otwórz wspólny schowek</a>
         </p>
+        {% if catalogue is defined %}
+           <p>
+                <a href="/storage?catalogue={{catalogue}}">Otwórz osobisty schowek</a>
+           </p>
+        {% endif %}
+    </div>
+    <div class="centered">
+        <form method="post" action="login">            
+            <label for="username">Login: </label>
+            <input type="text" name="username"/><br>
+            <label for="password">Hasło: </label>
+            <input type="password" name="password"/><br>
+            <input type="submit" value="LECIMY"></form> 
+        </form>
+        <h6> Nie masz konta? <a href="/register">Storojestruj się!</a> </h6>
     </div>
 </body>
 </html>

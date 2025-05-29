@@ -1,6 +1,10 @@
 .centered{
     text-align: center;
-    width: 100%;
+}
+
+.centered_table{
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .document{
@@ -12,3 +16,6 @@
     height:100px;
   }
 
+  .no_decor{
+    text-decoration: none;
+  }
