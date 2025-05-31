@@ -5,6 +5,14 @@
 .centered_table{
   margin-left: auto;
   margin-right: auto;
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+td, th{
+  border: 1px solid black;
+  border-collapse: collapse;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .document{
@@ -12,9 +20,16 @@
 }
 
 .drop_site {
-    border:1px solid black;
+    border:1px solid skyblue;
     height:100px;
+    align-content: center;
+    text-align: center;
+    color: skyblue;
   }
+.drop_site::hover{
+  border:1px solid lightblue;
+  color: lightblue;
+}
 
   .no_decor{
     text-decoration: none;

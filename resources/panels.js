@@ -8,3 +8,7 @@ function hidePanel(id){
     document.getElementById(id).style.display = "none";
 }
 
+function closeError(){
+    document.getElementById('errorMessage').style.display="none";
+}
+

@@ -42,10 +42,12 @@ class StoroDrive(object):
 
 
     @cherrypy.expose
-    def index(self):
+    def index(self, error = None):
         page_text = open('resources/index.html', encoding='utf-8').read()
         template = Template(page_text)
         data = {}
+        if error is not None:
+            data['error'] = error
         if 'user' in cherrypy.session:
             data['uname'] = cherrypy.session['user']['username']
             data['catalogue'] = cherrypy.session['user']['catalogue']
@@ -62,22 +64,42 @@ class StoroDrive(object):
         template = Template(page_text)
         return template.render(data)
 
-    @cherrypy.expose
-    def login(self, username, password):
+    def _create_user_session(self, username, password):
         #pswd_hash = sha256(password.encode)
         pswd_hash = password
-        user_record = user_db.search(Query().username == username)[0]
-        print(user_record)
+        user_record = user_db.search(Query().username == username)
+        error = None
+        if len(user_record)==0:
+            error = "Użytkownik nie istnieje"
+        user_record = user_record[0]
         if user_record["pswd_hash"] == pswd_hash:
             cherrypy.session['user'] = user_record
+        else: error = "Hasło niepoprawne"
+        return error
+
+    @cherrypy.expose
+    def login(self, username, password):
+        error_msg = self._create_user_session(username,password)
+        return self.index(error_msg)
+
+    @cherrypy.expose
+    def logout(self):
+        cherrypy.session.regenerate()
         return self.index()
 
     @cherrypy.expose
-    def register(self):
-        return open('resources/register.html', encoding='utf-8')
+    def register(self, error = None):
+        data = {}
+        if error is not None:
+            data['error'] = error
+        page_text = open('resources/register.html', encoding='utf-8').read()
+        template = Template(page_text)
+        return template.render(data)
 
     @cherrypy.expose
     def create_user(self, username, password, confirm):
+        if (len(user_db.search(Query().username == username))>0):
+            return self.register(error="Użytkownik " + username + " już istnieje!")
         if(password == confirm):
             #pswd_hash = sha256(password.encode())
             pswd_hash = password

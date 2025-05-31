@@ -7,30 +7,45 @@
 <body>
     <div class="centered">
         <h1>StoroDrive</h1>
-        <h3>Storomy się jak możemy!</h3>
+        <h2>Storomy się jak możemy!</h2>
         {% if uname is defined %}
-            <h4> Witaj, {{uname}}!</h4>
+            <h4> 
+                Witaj, {{uname}}!
+                <span><a href="logout"> Wyloguj </a></span>
+            </h4>
+        {% endif %}
+        {% if error is defined %}
+            <div id="errorMessage" class="centered" >
+                <h6 style="color:red">
+                    {{error}}
+                    <span>
+                        <a onclick="closeError()" style="color:red; text-decoration: underline;">Zamknij</a>
+                    </span>
+                </h6>
+            </div>
         {% endif %}
     </div>
     <div class="centered">
         <p>
-            <a href="/storage?catalogue=common">Otwórz wspólny schowek</a>
+            <a href="/storage?catalogue=common">Otwórz wspólny STOROGE</a>
         </p>
         {% if catalogue is defined %}
            <p>
-                <a href="/storage?catalogue={{catalogue}}">Otwórz osobisty schowek</a>
+                <a href="/storage?catalogue={{catalogue}}">Otwórz osobisty STOROGE</a>
            </p>
         {% endif %}
     </div>
+    {% if uname is not defined %}
     <div class="centered">
         <form method="post" action="login">            
             <label for="username">Login: </label>
             <input type="text" name="username"/><br>
             <label for="password">Hasło: </label>
             <input type="password" name="password"/><br>
-            <input type="submit" value="LECIMY"></form> 
+            <input type="submit" value="STORT"></form> 
         </form>
         <h6> Nie masz konta? <a href="/register">Storojestruj się!</a> </h6>
     </div>
+    {% endif %}
 </body>
 </html>
