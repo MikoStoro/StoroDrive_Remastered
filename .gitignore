@@ -1,4 +1,9 @@
 volume/*
+!volume/.gitkeep
+!volume/common/.gitkeep
 databases/*
+!databases/.gitkeep
 .venv
 __pycache__/*
+resources/__pycache__/*
+
