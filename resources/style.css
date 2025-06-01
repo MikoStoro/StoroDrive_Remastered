@@ -7,6 +7,7 @@
   margin-right: auto;
   border: 1px solid black;
   border-collapse: collapse;
+  width: 50%;
 }
 td, th{
   border: 1px solid black;
@@ -31,6 +32,19 @@ td, th{
   color: lightblue;
 }
 
-  .no_decor{
-    text-decoration: none;
-  }
+.no_decor{
+  text-decoration: none;
+}
+
+.navbar{
+  width:100%;
+  float: left;
+}
+.navbar::after{
+  clear: both;
+}
+
+.navbar_item{
+  float:left;
+  padding-right: 10px;
+}

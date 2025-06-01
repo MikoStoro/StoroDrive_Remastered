@@ -1,0 +1,14 @@
+<div class="navbar">
+    <span class="navbar_item"><a href="index">
+        Strona Główna
+    </a></span>
+    <span class="navbar_item"><a href="storage?catalogue=common">
+        Wspólny Storoge
+    </a></span>
+    {% if user is defined %}
+    <span class="navbar_item"><a href="storage?catalogue={{user.catalogue}}">
+        Osobisty Storoge
+    </a></span>
+    {% endif %}
+</div>
+<br>

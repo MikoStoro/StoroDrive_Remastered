@@ -1,5 +1,6 @@
 import os
 import tinydb
+import file_tools as FTools
 
 def get_document(filename:str,catalogue="common"):
     element = '<div class="document">' 
@@ -35,8 +36,9 @@ def get_documents_table(catalogue:str="common"):
     table += "</tr>"
  
 
-    for d in get_documents(catalogue):
-        table += get_document_table_row(d, catalogue)
+    #for d in get_documents(catalogue):
+    for d in FTools.get_all_files(catalogue):
+        table += get_document_table_row(d['name'], catalogue)
     table += "</table>"
     return table
 

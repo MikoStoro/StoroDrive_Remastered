@@ -1,36 +1,16 @@
 import cherrypy
 from cherrypy.lib import static, sessions
-from tinydb import TinyDB, Query
-from jinja2 import Template
 import resources.shards as Shards
 import os
 from hashlib import sha256
-import uuid
+import user_tools as UTools
+import page_tools as PTools
+import file_tools as FTools
+import config
 
-localDir = os.path.dirname(__file__)
-absDir = os.path.join(os.getcwd(), localDir)
+volume_path = config.path_to_volume
 
-user_db = TinyDB(os.path.abspath("./databases/users.json"))
 
-conf={
-        
-       '/style.css':
-                    { 'tools.staticfile.on':True,
-                      'tools.staticfile.filename': os.path.abspath("./resources/style.css"),
-                    },
-        '/panels.css':
-                    { 'tools.staticfile.on':True,
-                      'tools.staticfile.filename': os.path.abspath("./resources/panels.css"),
-                    },
-        '/dragDrop.js':
-                    { 'tools.staticfile.on':True,
-                      'tools.staticfile.filename': os.path.abspath("./resources/dragDrop.js"),
-                    },
-        '/panels.js':
-                    { 'tools.staticfile.on':True,
-                      'tools.staticfile.filename': os.path.abspath("./resources/panels.js"),
-                    }
-    }
 conf = { '/' : { 'tools.sessions.on': True },
         '/static': {
             'tools.staticdir.on': True,
@@ -39,43 +19,56 @@ conf = { '/' : { 'tools.sessions.on': True },
         }
 
 class StoroDrive(object):
+    def _upload_file(self,file, catalogue, relative_path = None):
+        #file_path = FTools.get_catalogue_path(catalogue)
+        FTools.insert_file(file, catalogue, relative_path)
 
+    def _create_user_session(self, username, password):
+        #pswd_hash = sha256(password.encode)
+        error = None
+        if not UTools.user_exists(username):
+            error = "Użytkownik nie istnieje!"
+        elif UTools.check_password(username, password):
+                cherrypy.session['user'] = UTools.get_user(username)
+        else: error = "Hasło niepoprawne!"
+        return error
 
     @cherrypy.expose
     def index(self, error = None):
-        page_text = open('resources/index.html', encoding='utf-8').read()
-        template = Template(page_text)
         data = {}
         if error is not None:
             data['error'] = error
         if 'user' in cherrypy.session:
+            data['user'] = cherrypy.session['user']
             data['uname'] = cherrypy.session['user']['username']
             data['catalogue'] = cherrypy.session['user']['catalogue']
-        return template.render(data)
+        return PTools.page_from_template('resources/index.html', data)
 
     @cherrypy.expose
-    def storage(self, catalogue="common"):
-        path = os.path.abspath("./volume/" + catalogue)
-        if not os.path.exists(path):
-            os.makedirs(path, mode=0o777, exist_ok=False)
-        content = Shards.get_documents_table(catalogue)
-        data = { "id" : catalogue, "content" : content}
-        page_text = open('resources/storage.html', encoding='utf-8').read()
-        template = Template(page_text)
-        return template.render(data)
-
-    def _create_user_session(self, username, password):
-        #pswd_hash = sha256(password.encode)
-        pswd_hash = password
-        user_record = user_db.search(Query().username == username)
-        error = None
-        if len(user_record)==0:
-            error = "Użytkownik nie istnieje"
-        user_record = user_record[0]
-        if user_record["pswd_hash"] == pswd_hash:
-            cherrypy.session['user'] = user_record
-        else: error = "Hasło niepoprawne"
-        return error
+    def storage(self, catalogue="common", relative_path=None, error = None):
+        cat_name = FTools.get_catalogue_name(catalogue)
+        files = FTools.get_all_files(catalogue, relative_path)
+        directories = FTools.get_all_directories(catalogue, relative_path)
+        data = { "catalogue_id" : catalogue, "catalogue_name" : cat_name}
+        parent_path = None
+        if relative_path == '':
+            relative_path = None
+        if relative_path is not None:
+            parent_path = FTools.get_parent_path(relative_path)
+        if error is not None:
+            data['error'] = error
+        if 'user' in cherrypy.session:
+            data['user'] = cherrypy.session['user']
+        if len(files) > 0:
+            data['files'] = files
+        if len(directories)>0:
+            data['directories'] = directories
+        if relative_path is not None:
+            data['relative_path'] = relative_path
+            data['relative_path_split'] = FTools.split_path(relative_path)
+        if parent_path is not None:
+            data['parent_path'] = parent_path
+        return  PTools.page_from_template('resources/storage.html', data)
 
     @cherrypy.expose
     def login(self, username, password):
@@ -92,59 +85,51 @@ class StoroDrive(object):
         data = {}
         if error is not None:
             data['error'] = error
-        page_text = open('resources/register.html', encoding='utf-8').read()
-        template = Template(page_text)
-        return template.render(data)
+        return PTools.page_from_template('resources/register.html', data)
 
     @cherrypy.expose
     def create_user(self, username, password, confirm):
-        if (len(user_db.search(Query().username == username))>0):
+        if UTools.user_exists(username):
             return self.register(error="Użytkownik " + username + " już istnieje!")
+        error = None
         if(password == confirm):
-            #pswd_hash = sha256(password.encode())
-            pswd_hash = password
-            user_db.insert({
-                'username': username, 
-                'pswd_hash': pswd_hash, 
-                'catalogue': str(uuid.uuid1()), 
-                'user_id': str(uuid.uuid1())
-            })
-        return self.index()
+            UTools.create_user(username,password)
+            error = self._create_user_session(username, password)
+        return self.index(error)
     
 
     @cherrypy.expose
-    def download(self, filename, catalogue="common"):
-        path = os.path.join(absDir,"volume",catalogue, filename)
+    def download(self, filename, catalogue="common", relative_path=None):
         return static.serve_file(
-            path,
+            FTools.get_download_file_path(filename,catalogue,relative_path),
             'application/x-download',
             'attachment',
-            os.path.basename(path),
+            filename,
         )
 
-    def _upload_file(self,file, catalogue):
-        upload_path = os.path.join(absDir,"volume",catalogue, file.filename)
-        with open(upload_path, 'wb') as out:
-            while True:
-                data = file.file.read(8192)
-                if not data:
-                    break
-                out.write(data)
-
     @cherrypy.expose
-    def upload(self, file, catalogue):
+    def upload(self, file, catalogue, relative_path= None):
         if isinstance(file, list):
             for f in file:
-                self._upload_file(f,catalogue)
+                self._upload_file(f,catalogue, relative_path)
         else:
-            self._upload_file(file,catalogue)
+            self._upload_file(file,catalogue, relative_path)
         return self.storage(catalogue)
 
     @cherrypy.expose
-    def delete(self, filename, catalogue):
-        delete_path = os.path.join(absDir,"volume",catalogue, filename)
-        os.remove(delete_path)
-        return self.storage(catalogue)
+    def createDirectory(self, catalogue, name, relative_path= None):
+        FTools.create_directory(name,catalogue,relative_path)
+        return self.storage(catalogue, relative_path)
+
+    @cherrypy.expose
+    def delete(self, filename, catalogue="common", relative_path=None):
+        error = FTools.remove_file(filename, catalogue,relative_path)
+        return self.storage(catalogue, relative_path, error)
+    
+    @cherrypy.expose
+    def delete_directory(self, directory_name, catalogue="common", relative_path=None):
+        error = FTools.remove_directory(directory_name, catalogue,relative_path)
+        return self.storage(catalogue, relative_path, error)
 
 if __name__ == '__main__':
     cherrypy.quickstart(StoroDrive(), "/" ,config=conf)

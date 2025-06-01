@@ -36,4 +36,3 @@ function closeUploadPanel(){
     hidePanel("uploadPanel");
     resetFilesUpload()
 }
-

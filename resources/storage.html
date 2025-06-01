@@ -6,21 +6,109 @@
     <link rel="stylesheet" href="static/panels.css">
 </head>
 <body>
+    {{navbar}}
     <div class="centered">
         <h1>STOROGE</h1>
-        <h2>  {{id}} </h2>
+        <h2>
+            {% if parent_path is defined %}
+            <a href="storage?catalogue={{catalogue_id}}&relative_path={{parent_path}}" class="no_decor"> ⬅️ </a>
+            {% elif relative_path is defined %}
+            <a href="storage?catalogue={{catalogue_id}}"  class="no_decor">  ⬅️ </a>
+            {% endif %}
+            <a href="storage?catalogue={{catalogue_id}}"  class="no_decor" > {{catalogue_name}} </a>
+        {% if relative_path_split is defined %}
+            {% for part in relative_path_split %}
+                <a href="storage?catalogue={{catalogue_id}}&relative_path={{part[1]}}"> > {{part[0]}} </a>
+            {% endfor %}
+        {% endif %}
+        </h2>
     </div>
-
+    {% if error is defined %}
+    <div id="errorMessage" class="centered" >
+        <h6 style="color:red">
+            {{error}}
+            <span>
+                <a onclick="closeError()" style="color:red; text-decoration: underline; cursor: pointer;"> Zamknij </a>
+            </span>
+        </h6>
+        
+    </div>
+    {% endif %}
     <div class="centered">
-        {{content}}
+        {% if directories is defined %}
+        <h3>Katalogi</h3>
+        <table class='centered_table'>
+            <tr>
+                <th> Nazwa </th>
+                <th> Wejdź </th>
+                <th> Usuń </th>
+            </tr>
+            {% for dir in directories %}
+            <tr>
+                <td>{{dir.name}}</td>
+                <td> <button> <a href="storage?catalogue={{catalogue_id}}&relative_path={{dir.relative_path}}" class="no_decor"> ➡️ </a> </button> </td>
+                <td>  <button> <a  href="delete_directory?catalogue={{catalogue_id}}&relative_path={{relative_path}}&directory_name={{dir.name}}" class="no_decor" >🪓</a> </button> </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <br>
+        {% endif %}
+        {% if files is defined%}
+        <h3>Pliki</h3>
+        <table class='centered_table'>
+        <tr>
+            <th> Nazwa </th>
+            <th> Podgląd </th>
+            <th> Pobierz </th>
+            <th> Usuń </th>
+        </tr>
+        {% for file in files %}
+        <tr>
+            <td> {{file.name}} </td>
+            <td> 
+                {% if relative_path is defined %}
+                <button onclick="showDisplayPanel( '{{file.name}}' , '{{catalogue_id}}',  '{{relative_path}}') "> 🔎 </button>
+                {% else %}
+                <button onclick="showDisplayPanel( '{{file.name}}' , '{{catalogue_id}}') "> 🔎 </button>
+                {% endif %}
+            </td>
+            <td>
+                {% if relative_path is defined %}
+                <button> <a href="download?catalogue={{catalogue_id}}&filename={{file.name}}&relative_path={{relative_path}}" class="no_decor"> 📥 </a> </button>
+                {% else %}
+                <button> <a href="download?catalogue={{catalogue_id}}&filename={{file.name}}" class="no_decor"> 📥 </a> </button>
+                {% endif %}
+            </td>
+
+            <td>
+                <button>
+                    {% if relative_path is defined %}
+                        <a href="delete?catalogue={{catalogue_id}}&filename={{file.name}}&relative_path={{relative_path}} " class="no_decor"> 🪓 </a>
+                    {% else %}
+                        <a href="delete?catalogue={{catalogue_id}}&filename={{file.name}}" class="no_decor"> 🪓 </a>
+                    {% endif %}
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+        </table>
+        {% endif %}
     </div>
 
     <br>
     <div class="centered">
         <button onclick="showPanel('uploadPanel')">Załaduj Pliki</button>
     </div>
+    <div class="centered">
+        <button onclick="showPanel('createDirPanel')">Nowy Folder</button>
+    </div>
 
     <div id="smokescreen"></div>
+    
+    <div id="displayPanel" class="centered panel">
+        <button onclick="hidePanel('displayPanel')">Zamknij</button>
+    </div>
+
     <div id="uploadPanel" class="panel">
         <div id="dropContainer" class="drop_site"  >
             Upuść pliki tutaj
@@ -29,17 +117,29 @@
         <div class="centered">
             <form id="fileUploadForm" action="/upload" method="post" enctype="multipart/form-data" target="_self">
                 Wybierz plik: <input id="fileInput" type="file" name="file" />
-                <input  type="text" name="catalogue" value="{{id}}" hidden="true" />
-                
+                <input  type="text" name="catalogue" value="{{catalogue_id}}" hidden="true" />
+                {% if relative_path is defined %}
+                <input  type="text" name="relative_path" value="{{relative_path}}" hidden="true" />
+                {% endif %}
             </form>
-            <div id="files_list">
-
-            </div>
+            <div id="files_list"></div>
             <br>
             <button onclick="resetFilesUpload()">Reset</button>
             <button onclick="closeUploadPanel()">Zamknij</button>
             <input type="submit" value="Prześlij" form="fileUploadForm"/>
         </div>
+    </div>
+    <div id="createDirPanel" class="panel centered">
+        <form id="createDirform" action="/createDirectory" method="get" enctype="multipart/form-data" target="_self">
+            Nazwa Folderu: <input id="directoryNameInput" type="text" name="name" />
+            <input  type="text" name="catalogue" value="{{catalogue_id}}" hidden="true" />
+            {% if relative_path is defined %}
+            <input  type="text" name="relative_path" value="{{relative_path}}" hidden="true" />
+            {% endif %}
+        </form>
+        <br>
+        <input type="submit" value="Stwórz" form="createDirform"/>
+        <button onclick="hidePanel('createDirPanel')">Zamknij</button>
     </div>
     <script src="static/dragDrop.js"></script>
     <script src="static/panels.js"></script>
