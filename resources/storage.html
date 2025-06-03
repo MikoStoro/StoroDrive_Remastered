@@ -45,7 +45,7 @@
             </tr>
             {% for dir in directories %}
             <tr>
-                <td>{{dir.name}}</td>
+                <td> {{dir.name}} </td>
                 <td> <button> <a href="storage?catalogue={{catalogue_id}}&relative_path={{dir.relative_path}}" class="no_decor"> ➡️ </a> </button> </td>
                 <td>  <button> <a  href="delete_directory?catalogue={{catalogue_id}}&relative_path={{relative_path}}&directory_name={{dir.name}}" class="no_decor" >🪓</a> </button> </td>
             </tr>
@@ -55,8 +55,10 @@
         {% endif %}
         {% if files is defined%}
         <h3>Pliki</h3>
+       
         <table class='centered_table'>
         <tr>
+            <th> <input id="select_all_checkbox" type="checkbox" onclick="select_all_files()" /> </th>
             <th> Nazwa </th>
             <th> Podgląd </th>
             <th> Pobierz </th>
@@ -64,6 +66,7 @@
         </tr>
         {% for file in files %}
         <tr>
+            <td> <input form="batch_form" name="{{file.name}}" type="checkbox" class="file_selection" onclick="auto_toggle_batch_panel()"/> </td>
             <td> {{file.name}} </td>
             <td> 
                 {% if relative_path is defined %}
@@ -94,7 +97,17 @@
         </table>
         {% endif %}
     </div>
+    <div id="batch_panel" class="centered" style="display: none;">
+        <form method="get" action="batch_operation" id="batch_form">
+            <input type="submit" name="download" value="Pobierz zaznaczone"> 
+            <input type="submit" name="delete" value="Usuń zaznaczone"> 
+            <input type="text" hidden="true" name="catalogue" value="{{catalogue_id}}">
+            {% if relative_path is defined %}
+                <input type="text" hidden="true" name="relative_path" value="{{relative_path}}" >
+            {% endif %}
+        </form>
 
+    </div>
     <br>
     <div class="centered">
         <button onclick="showPanel('uploadPanel')">Załaduj Pliki</button>
@@ -143,5 +156,5 @@
     </div>
     <script src="static/dragDrop.js"></script>
     <script src="static/panels.js"></script>
-    
+    <script src="static/fileSelection.js"></script>
 </body>

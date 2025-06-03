@@ -106,6 +106,21 @@ class StoroDrive(object):
             'attachment',
             filename,
         )
+    
+    def download_multiple(self, filenames, catalogue, relative_path=None):
+        filename = FTools.get_multiple_files_zip(filenames,catalogue,relative_path)
+        name = os.path.basename(filename)
+        return static.serve_file(
+            filename,
+            'application/x-download',
+            'attachment',
+            name,
+        )
+
+    def get_url_suffix(self, catalogue, relative_path= None):
+        if relative_path is not None:
+            return '?catalogue='+catalogue+'&relative_path=' + relative_path
+        else: return '?catalogue='+catalogue
 
     @cherrypy.expose
     def upload(self, file, catalogue, relative_path= None):
@@ -114,7 +129,7 @@ class StoroDrive(object):
                 self._upload_file(f,catalogue, relative_path)
         else:
             self._upload_file(file,catalogue, relative_path)
-        return self.storage(catalogue)
+        raise cherrypy.HTTPRedirect('/storage'+self.get_url_suffix(catalogue,relative_path))
 
     @cherrypy.expose
     def createDirectory(self, catalogue, name, relative_path= None):
@@ -130,6 +145,18 @@ class StoroDrive(object):
     def delete_directory(self, directory_name, catalogue="common", relative_path=None):
         error = FTools.remove_directory(directory_name, catalogue,relative_path)
         return self.storage(catalogue, relative_path, error)
+
+    @cherrypy.expose
+    def batch_operation(self, catalogue, relative_path=None, delete=None, download=None, **kwargs):
+        print(kwargs)
+        if download is not None:
+            names = [ key for key in kwargs ] 
+            return self.download_multiple(names,catalogue,relative_path) 
+        if delete is not None:
+            for key in kwargs:
+                self.delete(key,catalogue,relative_path) 
+        raise cherrypy.HTTPRedirect('/storage'+self.get_url_suffix(catalogue,relative_path))
+        
 
 if __name__ == '__main__':
     cherrypy.quickstart(StoroDrive(), "/" ,config=conf)

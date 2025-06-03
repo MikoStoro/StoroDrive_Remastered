@@ -2,6 +2,7 @@ from tinydb import TinyDB, Query
 import os
 import uuid
 import config
+import zipfile
 
 databases_db_path = os.path.abspath("./databases")
 catalogues_db_path = os.path.abspath("./databases/catalogues.json")
@@ -66,6 +67,15 @@ def get_file(filename,catalogue,relative_path=None):
 def get_download_file_path(filename, catalogue, relative_path = None):
     file_data = get_file(filename, catalogue, relative_path)
     return file_data['path']
+
+def get_multiple_files_zip(filenames, catalogue, relative_path = None):
+    paths = [ get_download_file_path(x,catalogue,relative_path) for x in filenames ]
+    tmp_name =  catalogue + ".zip"
+    ZipFile = zipfile.ZipFile(tmp_name, "w" )
+    for path in paths:
+        ZipFile.write(path, os.path.basename(path), compress_type=zipfile.ZIP_DEFLATED)
+    ZipFile.close()
+    return os.path.abspath(tmp_name)
 
 
 def insert_file(file, catalogue, relative_path=None):
