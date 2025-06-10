@@ -43,10 +43,25 @@ def get_complete_path(catalogue,relative_path=None):
     relative_path = translate_relative_path(relative_path)
     return os.path.join(cat_path, relative_path)
 
+def get_size_str(fsize:int):
+    GB = 1000000000
+    MB = 1000000
+    KB = 1000
+    if fsize // GB>0:
+        return str(fsize // GB) + " GB"
+    if fsize // MB>0:
+        return str(fsize // MB) + " MB"
+    if fsize // KB>0:
+        return str(fsize // KB) + " KB"
+    return str(fsize) + " B"
+
 def get_file_info(file):
     ftype = file.content_type.value
-    fsize = file.fp.length
-    return {"size" : fsize, "file_type" : ftype}
+    sys_file = file.file.raw
+    sys_file.seek(0, os.SEEK_END)
+    fsize = sys_file.tell()
+    size_display = get_size_str(fsize)
+    return { "size" : fsize, "file_type" : ftype, "size_display" : size_display }
 
 def get_catalogue_name(id):
     catalogue= Query()
@@ -81,7 +96,8 @@ def get_multiple_files_zip(filenames, catalogue, relative_path = None):
 def insert_file(file, catalogue, relative_path=None):
     path = get_complete_path(catalogue,relative_path)
     file_path = os.path.join(path, file.filename)
-
+    _ , extension = os.path.splitext(file_path)
+    extension = extension.replace('.', '')
     with open(file_path, 'wb') as out:
         while True:
             data = file.file.read(8192)
@@ -90,7 +106,7 @@ def insert_file(file, catalogue, relative_path=None):
             out.write(data)
     index = get_index(path)
     file_info = get_file_info(file)
-    file_entry = { 'type' : 'file', 'name' : file.filename, 'path' : file_path, **file_info}
+    file_entry = { 'type' : 'file', 'name' : file.filename, 'path' : file_path, 'extension' : extension, **file_info}
     index.insert(file_entry)
     index.close()
 
@@ -108,11 +124,14 @@ def remove_file(filename,catalogue,relative_path=None):
     index.close()
 
 
-def get_all_files(catalogue, relative_path=None):
+def get_all_files(catalogue, relative_path=None, sort_field = None, sort_reverse=False):
     path = get_complete_path(catalogue,relative_path)
     index = TinyDB(os.path.join(path,"index.json"))
     file = Query()
     files = index.search(file.type == 'file')
+    print(files, sort_reverse)
+    if sort_field is not None:
+        files.sort(reverse=sort_reverse, key= lambda x: x[sort_field])
     index.close()
     return files
 

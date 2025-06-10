@@ -11,7 +11,8 @@ import config
 volume_path = config.path_to_volume
 
 
-conf = { '/' : { 'tools.sessions.on': True },
+conf = {'/' : { 
+    'tools.sessions.on': True},
         '/static': {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': os.path.abspath("./resources")
@@ -45,9 +46,9 @@ class StoroDrive(object):
         return PTools.page_from_template('resources/index.html', data)
 
     @cherrypy.expose
-    def storage(self, catalogue="common", relative_path=None, error = None):
+    def storage(self, catalogue="common", relative_path=None, error = None, sort_field=None, sort_reverse=False):
         cat_name = FTools.get_catalogue_name(catalogue)
-        files = FTools.get_all_files(catalogue, relative_path)
+        files = FTools.get_all_files(catalogue, relative_path, sort_field, sort_reverse=='True')
         directories = FTools.get_all_directories(catalogue, relative_path)
         data = { "catalogue_id" : catalogue, "catalogue_name" : cat_name}
         parent_path = None
@@ -68,6 +69,8 @@ class StoroDrive(object):
             data['relative_path_split'] = FTools.split_path(relative_path)
         if parent_path is not None:
             data['parent_path'] = parent_path
+        if sort_reverse is not None:
+            data['sort_reverse'] = sort_reverse
         return  PTools.page_from_template('resources/storage.html', data)
 
     @cherrypy.expose
@@ -159,4 +162,9 @@ class StoroDrive(object):
         
 
 if __name__ == '__main__':
+    cherrypy.config.update({
+    'server.max_request_body_size': 0,
+    'server.socket_timeout' : 60,
+    'request.body.maxBytes': 0,
+    })
     cherrypy.quickstart(StoroDrive(), "/" ,config=conf)
