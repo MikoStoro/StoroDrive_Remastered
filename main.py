@@ -153,7 +153,6 @@ class StoroDrive(object):
 
     @cherrypy.expose
     def batch_operation(self, catalogue, relative_path=None, delete=None, download=None, **kwargs):
-        print(kwargs)
         if download is not None:
             names = [ key for key in kwargs ] 
             return self.download_multiple(names,catalogue,relative_path) 

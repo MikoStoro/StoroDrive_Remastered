@@ -48,10 +48,8 @@
                 <td> {{dir.name}} </td>
                 <td> <button> <a href="storage?catalogue={{catalogue_id}}&relative_path={{dir.relative_path}}" class="no_decor"> ➡️ </a> </button> </td>
                 <td> 
-                    <button onclick="showDeletePanel( '{{dir.name}}', 'delete_directory{{location_path}}&directory_name={{dir.name}}' )">
-                    🪓
-                    </button>
-                   
+                    <button onclick="showDeletePanel( '{{dir.name}}', 'delete_directory{{location_path}}&directory_name={{dir.name}}' )">🪓</button>
+                </td>
             </tr>
             {% endfor %}
         </table>
@@ -112,7 +110,7 @@
     <div id="batch_panel" class="centered" style="display: none;">
         <form method="get" action="batch_operation" id="batch_form">
             <input type="submit" name="download" value="Pobierz zaznaczone"> 
-            <input type="submit" name="delete" value="Usuń zaznaczone"> 
+            <input type="button" onclick="showPanel('deleteMultiplePanel')" value="Usuń zaznaczone"> 
             <input type="text" hidden="true" name="catalogue" value="{{catalogue_id}}">
             {% if relative_path is defined %}
                 <input type="text" hidden="true" name="relative_path" value="{{relative_path}}" >
@@ -135,9 +133,16 @@
     </div>
     <div id="deletePanel" class="centered panel">
         <p>Czy na pewno chcesz usunąć <span id="sureToDeleteName">...</span>?</p>
-        <button> <a id="yes_delete_btn" class="no_decor" style="color: red;"> TAK </a> </button>
+        <button> <a id="yes_delete_btn" class="no_decor" style="color: black;"> TAK </a> </button>
         <button onclick="hidePanel('deletePanel')"> <a id="no_delete_btn" class="no_decor"> NIE </a> </button>
     </div>
+
+    <div id="deleteMultiplePanel" class="centered panel">
+        <p>Czy na pewno chcesz usunąć zaznaczone pliki?</p>
+        <input form="batch_form" type="submit" name="delete" value="TAK"> 
+        <button onclick="hidePanel('deleteMultiplePanel')">  NIE </button>
+    </div>
+
     <div id="uploadPanel" class="panel">
         <div id="dropContainer" class="drop_site"  >
             Upuść pliki tutaj
