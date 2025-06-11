@@ -47,7 +47,7 @@
             <tr>
                 <td> {{dir.name}} </td>
                 <td> <button> <a href="storage?catalogue={{catalogue_id}}&relative_path={{dir.relative_path}}" class="no_decor"> ➡️ </a> </button> </td>
-                <td>  <button> <a  href="delete_directory?catalogue={{catalogue_id}}&relative_path={{relative_path}}&directory_name={{dir.name}}" class="no_decor" >🪓</a> </button> </td>
+                <td> <button> <a href="delete_directory?catalogue={{catalogue_id}}&relative_path={{relative_path}}&directory_name={{dir.name}}" class="no_decor" >🪓</a> </button> </td>
             </tr>
             {% endfor %}
         </table>
@@ -55,64 +55,30 @@
         {% endif %}
         {% if files is defined%}
         <h3>Pliki</h3>
-       
+        <div class="centered">
+            <input type="text" onchange="filter_files(this.value)" placeholder="Wyszukaj">
+        </div>
         <table class='centered_table'>
         <tr>
             <th> <input id="select_all_checkbox" type="checkbox" onclick="select_all_files()" /> </th>
-            <th> Nazwa 
-                {% if relative_path is defined %}            
-                <a class="no_decor" href="storage?catalogue={{catalogue_id}}&relative_path={{relative_path}}&sort_field=name&sort_reverse=False">
-                {% else %}
-                <a class="no_decor" href="storage?catalogue={{catalogue_id}}&sort_field=name&sort_reverse=False">
-                {% endif %}
-                    ↑
-                </a>
-                {% if relative_path is defined %}            
-                <a class="no_decor" href="storage?catalogue={{catalogue_id}}&relative_path={{relative_path}}&sort_field=name&sort_reverse=True">
-                {% else %}
-                <a class="no_decor" href="storage?catalogue={{catalogue_id}}&sort_field=name&sort_reverse=True">
-                {% endif %}
-                    ↓
-                </a>
+            <th> Nazwa      
+                <a class="no_decor" href="storage{{location_path}}&sort_field=name&sort_reverse=False">↑</a>        
+                <a class="no_decor" href="storage{{location_path}}&sort_field=name&sort_reverse=True">↓</a>
             </th>
-            <th> Rozmiar
-                {% if relative_path is defined %}            
-                <a class="no_decor" href="storage?catalogue={{catalogue_id}}&relative_path={{relative_path}}&sort_field=size&sort_reverse=False">
-                {% else %}
-                <a class="no_decor" href="storage?catalogue={{catalogue_id}}&sort_field=size&sort_reverse=False">
-                {% endif %}
-                    ↑
-                </a>
-                {% if relative_path is defined %}            
-                <a class="no_decor" href="storage?catalogue={{catalogue_id}}&relative_path={{relative_path}}&sort_field=size&sort_reverse=True">
-                {% else %}
-                <a class="no_decor" href="storage?catalogue={{catalogue_id}}&sort_field=size&sort_reverse=True">
-                {% endif %}
-                    ↓
-                </a>
+            <th> Rozmiar       
+                <a class="no_decor" href="storage{{location_path}}&sort_field=size&sort_reverse=False">↑</a>      
+                <a class="no_decor" href="storage{{location_path}}&sort_field=size&sort_reverse=True">↓</a>
             </th>
-            <th> Typ
-                {% if relative_path is defined %}            
-                <a class="no_decor" href="storage?catalogue={{catalogue_id}}&relative_path={{relative_path}}&sort_field=file_type&sort_reverse=False">
-                {% else %}
-                <a class="no_decor" href="storage?catalogue={{catalogue_id}}&sort_field=file_type&sort_reverse=False">
-                {% endif %}
-                    ↑
-                </a>
-                {% if relative_path is defined %}            
-                <a class="no_decor" href="storage?catalogue={{catalogue_id}}&relative_path={{relative_path}}&sort_field=file_type&sort_reverse=True">
-                {% else %}
-                <a class="no_decor" href="storage?catalogue={{catalogue_id}}&sort_field=file_type&sort_reverse=True">
-                {% endif %}
-                    ↓
-                </a>
+            <th> Typ       
+                <a class="no_decor" href="storage{{location_path}}&sort_field=file_type&sort_reverse=False">↑</a>      
+                <a class="no_decor" href="storage{{location_path}}&sort_field=file_type&sort_reverse=True">↓</a>
             </th>
             <th> Podgląd </th>
             <th> Pobierz </th>
             <th> Usuń </th>
         </tr>
         {% for file in files %}
-        <tr>
+        <tr class="file_tr" id="tr_{{file.name}}">
             <td> <input form="batch_form" name="{{file.name}}" type="checkbox" class="file_selection" onclick="auto_toggle_batch_panel()"/> </td>
             <td> {{file.name}} </td>
            
@@ -126,19 +92,11 @@
                 {% endif %}
             </td>
             <td>
-                {% if relative_path is defined %}
-                <button> <a href="download?catalogue={{catalogue_id}}&filename={{file.name}}&relative_path={{relative_path}}" class="no_decor"> 📥 </a> </button>
-                {% else %}
-                <button> <a href="download?catalogue={{catalogue_id}}&filename={{file.name}}" class="no_decor"> 📥 </a> </button>
-                {% endif %}
+                <button> <a href="download{{location_path}}&filename={{file.name}}" class="no_decor"> 📥 </a> </button>
             </td>
             <td>
                 <button>
-                    {% if relative_path is defined %}
-                        <a href="delete?catalogue={{catalogue_id}}&filename={{file.name}}&relative_path={{relative_path}} " class="no_decor"> 🪓 </a>
-                    {% else %}
-                        <a href="delete?catalogue={{catalogue_id}}&filename={{file.name}}" class="no_decor"> 🪓 </a>
-                    {% endif %}
+                    <a href="delete{{location_path}}&filename={{file.name}} " class="no_decor"> 🪓 </a>
                 </button>
             </td>
         </tr>

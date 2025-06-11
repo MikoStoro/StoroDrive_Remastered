@@ -51,7 +51,9 @@ class StoroDrive(object):
         files = FTools.get_all_files(catalogue, relative_path, sort_field, sort_reverse=='True')
         directories = FTools.get_all_directories(catalogue, relative_path)
         data = { "catalogue_id" : catalogue, "catalogue_name" : cat_name}
+        location_path = self.get_url_suffix(catalogue,relative_path)
         parent_path = None
+        data['location_path'] = location_path
         if relative_path == '':
             relative_path = None
         if relative_path is not None:
