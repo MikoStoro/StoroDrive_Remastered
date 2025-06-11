@@ -22,7 +22,7 @@ conf = {'/' : {
 class StoroDrive(object):
     def _upload_file(self,file, catalogue, relative_path = None):
         #file_path = FTools.get_catalogue_path(catalogue)
-        FTools.insert_file(file, catalogue, relative_path)
+        return FTools.insert_file(file, catalogue, relative_path)
 
     def _create_user_session(self, username, password):
         #pswd_hash = sha256(password.encode)
@@ -137,17 +137,28 @@ class StoroDrive(object):
 
     @cherrypy.expose
     def upload(self, file, catalogue, relative_path= None):
+        exists = False
         if isinstance(file, list):
             for f in file:
-                self._upload_file(f,catalogue, relative_path)
+                err = self._upload_file(f,catalogue, relative_path)
+                if err is not None:
+                    exists = True
         else:
-            self._upload_file(file,catalogue, relative_path)
-        raise cherrypy.HTTPRedirect('/storage'+self.get_url_suffix(catalogue,relative_path))
+            err = self._upload_file(file,catalogue, relative_path)
+            if err is not None:
+                exists = True
+        if not exists:
+            raise cherrypy.HTTPRedirect('/storage' + self.get_url_suffix(catalogue,relative_path))
+        else:
+            raise cherrypy.HTTPRedirect('/storage' + self.get_url_suffix(catalogue,relative_path) + '&error=Plik istnieje!' )
 
     @cherrypy.expose
     def createDirectory(self, catalogue, name, relative_path= None):
-        FTools.create_directory(name,catalogue,relative_path)
-        return self.storage(catalogue, relative_path)
+        err = FTools.create_directory(name,catalogue,relative_path)
+        if err is None:
+            return self.storage(catalogue, relative_path)
+        else:
+            return self.storage(catalogue, relative_path, error='Katalog istnieje!')
 
     @cherrypy.expose
     def delete(self, filename, catalogue="common", relative_path=None):

@@ -98,6 +98,8 @@ def insert_file(file, catalogue, relative_path=None):
     file_path = os.path.join(path, file.filename)
     _ , extension = os.path.splitext(file_path)
     extension = extension.replace('.', '')
+    if os.path.exists(file_path):
+        return file.filename
     with open(file_path, 'wb') as out:
         while True:
             data = file.file.read(8192)
@@ -182,6 +184,8 @@ def get_catalogue_path(id):
 def create_directory(name,catalogue, relative_path = None):
     directory_path = get_complete_path(catalogue,relative_path)
     created_directory_path = os.path.join(directory_path,name)
+    if os.path.exists(created_directory_path):
+        return created_directory_path
     if relative_path is not None:
         relative_path = os.path.join(relative_path, name)
     else:
