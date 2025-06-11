@@ -112,6 +112,14 @@ class StoroDrive(object):
             filename,
         )
     
+    @cherrypy.expose
+    def util_download(self, filename, catalogue="common", relative_path=None):
+        return static.serve_file(
+            FTools.get_download_file_path(filename,catalogue,relative_path),
+            name = filename,
+        )
+    
+    
     def download_multiple(self, filenames, catalogue, relative_path=None):
         filename = FTools.get_multiple_files_zip(filenames,catalogue,relative_path)
         name = os.path.basename(filename)

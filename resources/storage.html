@@ -87,11 +87,7 @@
             <td>{{file.size_display}}</td>
             <td>{{file.extension}}</td>
              <td> 
-                {% if relative_path is defined %}
-                <button onclick="showDisplayPanel( '{{file.name}}' , '{{catalogue_id}}',  '{{relative_path}}') "> 🔎 </button>
-                {% else %}
-                <button onclick="showDisplayPanel( '{{file.name}}' , '{{catalogue_id}}') "> 🔎 </button>
-                {% endif %}
+                <button onclick="showDisplayPanel( '{{file.extension}}' , '{{file.name}}' , '{{location_path}}') "> 🔎 </button>
             </td>
             <td>
                 <button> <a href="download{{location_path}}&filename={{file.name}}" class="no_decor"> 📥 </a> </button>
