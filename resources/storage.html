@@ -47,7 +47,11 @@
             <tr>
                 <td> {{dir.name}} </td>
                 <td> <button> <a href="storage?catalogue={{catalogue_id}}&relative_path={{dir.relative_path}}" class="no_decor"> ➡️ </a> </button> </td>
-                <td> <button> <a href="delete_directory?catalogue={{catalogue_id}}&relative_path={{relative_path}}&directory_name={{dir.name}}" class="no_decor" >🪓</a> </button> </td>
+                <td> 
+                    <button onclick="showDeletePanel( '{{dir.name}}', 'delete_directory{{location_path}}&directory_name={{dir.name}}' )">
+                    🪓
+                    </button>
+                   
             </tr>
             {% endfor %}
         </table>
@@ -95,8 +99,9 @@
                 <button> <a href="download{{location_path}}&filename={{file.name}}" class="no_decor"> 📥 </a> </button>
             </td>
             <td>
-                <button>
-                    <a href="delete{{location_path}}&filename={{file.name}} " class="no_decor"> 🪓 </a>
+                <button onclick="showDeletePanel( '{{file.name}}', 'delete{{location_path}}&filename={{file.name}}' )">
+                    🪓
+                    <!-- a href="delete{{location_path}}&filename={{file.name}} " class="no_decor"> 🪓 </a-->
                 </button>
             </td>
         </tr>
@@ -128,7 +133,11 @@
     <div id="displayPanel" class="centered panel">
         <button onclick="hidePanel('displayPanel')">Zamknij</button>
     </div>
-
+    <div id="deletePanel" class="centered panel">
+        <p>Czy na pewno chcesz usunąć <span id="sureToDeleteName">...</span>?</p>
+        <button> <a id="yes_delete_btn" class="no_decor" style="color: red;"> TAK </a> </button>
+        <button onclick="hidePanel('deletePanel')"> <a id="no_delete_btn" class="no_decor"> NIE </a> </button>
+    </div>
     <div id="uploadPanel" class="panel">
         <div id="dropContainer" class="drop_site"  >
             Upuść pliki tutaj

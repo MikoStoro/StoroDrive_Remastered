@@ -26,3 +26,11 @@ function showDisplayPanel(filename, catalogue, relative_path = null){
         img.src = `download?catalogue=${catalogue}&filename=${filename}`;
     displayPanel.prepend(img)
 }
+
+function showDeletePanel(filename, href){
+    showPanel('deletePanel');
+    document.getElementById('sureToDeleteName').textContent=filename;
+    document.getElementById('yes_delete_btn').href = href;
+}
+
+
